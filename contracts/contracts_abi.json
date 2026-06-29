@@ -1,0 +1,155 @@
+{
+  "SpinGame": {
+    "address": "0x4B99Aa03CC8CD14158E5eD82D475dc13c308111c",
+    "network": "sepolia",
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "player", "type": "address"},
+          {"indexed": false, "name": "result", "type": "uint256"},
+          {"indexed": false, "name": "timestamp", "type": "uint256"}
+        ],
+        "name": "Spun",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "spin",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "spinFee",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [{"name": "", "type": "address"}],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
+  },
+  "BetGame": {
+    "address": "0x83e3DcEaba34935CE37CeBA88D9b19c6a31eF200",
+    "network": "sepolia",
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "matchId", "type": "uint256"}
+        ],
+        "name": "MatchCreated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "matchId", "type": "uint256"},
+          {"indexed": true, "name": "voter", "type": "address"},
+          {"indexed": false, "name": "outcome", "type": "uint8"}
+        ],
+        "name": "VoteCast",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "matchId", "type": "uint256"},
+          {"indexed": false, "name": "result", "type": "uint8"}
+        ],
+        "name": "MatchResolved",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "createMatch",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {"name": "matchId", "type": "uint256"},
+          {"name": "outcome", "type": "uint8"}
+        ],
+        "name": "vote",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {"name": "matchId", "type": "uint256"},
+          {"name": "result", "type": "uint8"}
+        ],
+        "name": "resolveMatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [{"name": "matchId", "type": "uint256"}],
+        "name": "getVoteStats",
+        "outputs": [
+          {"name": "team1", "type": "uint256"},
+          {"name": "team2", "type": "uint256"},
+          {"name": "draw", "type": "uint256"},
+          {"name": "total", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {"name": "matchId", "type": "uint256"},
+          {"name": "user", "type": "address"}
+        ],
+        "name": "getUserVote",
+        "outputs": [
+          {"name": "", "type": "uint8"},
+          {"name": "", "type": "bool"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [{"name": "matchId", "type": "uint256"}],
+        "name": "getMatchResult",
+        "outputs": [{"name": "", "type": "uint8"}],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "matchCount",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  }
+}

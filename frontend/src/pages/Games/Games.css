@@ -1,0 +1,22 @@
+.games-page { padding: 60px 0 80px; }
+.games-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.game-card {
+  display: flex; flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  transition: all 0.2s;
+  height: 100%;
+}
+.game-card.available { cursor: pointer; }
+.game-card.available:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-accent); }
+.game-card.locked { opacity: 0.45; cursor: not-allowed; }
+.game-card-emoji { font-size: 3rem; margin-bottom: 16px; }
+.game-card-body { flex: 1; }
+.game-card-body h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+.game-card-body p { font-size: 0.875rem; color: var(--text-secondary); }
+.game-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+.game-cost { font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted); }
+
+@media (max-width: 900px) { .games-grid { grid-template-columns: 1fr; } }
