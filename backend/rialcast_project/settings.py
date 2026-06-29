@@ -4,6 +4,7 @@ Django settings for RialCast DApp
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -61,10 +62,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'rialcast_project.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": dj_database_url.parse(
+        "postgresql://neondb_owner:npg_aEpF4wo3XWJv@ep-solitary-paper-abj1kjcy-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = []
@@ -102,7 +102,7 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://127.0.0.1:3000'
+    default='http://localhost:3000,http://127.0.0.1:3000,https://rial-cast.vercel.app/'
 ).split(',')
 CORS_ALLOW_CREDENTIALS = True
 
