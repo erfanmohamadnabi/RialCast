@@ -28,6 +28,9 @@ INSTALLED_APPS = [
     'apps.games',
     'apps.bets',
     'apps.leaderboard',
+
+    "cloudinary",
+    "cloudinary_storage",
 ]
 
 MIDDLEWARE = [
