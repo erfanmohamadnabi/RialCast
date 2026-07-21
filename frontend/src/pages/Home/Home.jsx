@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useWallet } from '../../context/WalletContext';
 import api from '../../utils/api';
+import TokenCreator from '../../components/TokenCreator/TokenCreator';
 import './Home.css';
 
 const fadeUp = {
@@ -145,6 +146,8 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Token Creator */}
+      <TokenCreator />
 
     </div>
   );
