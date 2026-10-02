@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { WalletProvider } from './context/WalletContext';
+import './App.css';
 
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
@@ -41,14 +42,17 @@ export default function App() {
         position="top-right"
         toastOptions={{
           style: {
-            background: '#1a1a24',
-            color: '#f0f0f8',
-            border: '1px solid rgba(108,99,255,0.25)',
-            fontFamily: 'Space Grotesk, sans-serif',
+            background: '#0d100d',
+            color: '#f3f6f3',
+            border: '1px solid #2b322b',
+            borderRadius: '12px',
+            fontFamily: "'Geist', system-ui, sans-serif",
             fontSize: '0.875rem',
+            boxShadow: 'none',
           },
-          success: { iconTheme: { primary: '#00e5a0', secondary: '#1a1a24' } },
-          error: { iconTheme: { primary: '#ff4d6d', secondary: '#1a1a24' } },
+          success: { iconTheme: { primary: '#39ff14', secondary: '#000000' } },
+          error: { iconTheme: { primary: '#ff5d6c', secondary: '#000000' } },
+          loading: { iconTheme: { primary: '#39ff14', secondary: '#2b322b' } },
         }}
       />
     </WalletProvider>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Rocket, Check, Copy, ExternalLink } from 'lucide-react';
 import { ethers } from 'ethers';
 import toast from 'react-hot-toast';
 import { useWallet } from '../../context/WalletContext';
@@ -55,55 +56,82 @@ export default function TokenCreator() {
     }
   };
 
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(deployedAddress);
+      toast.success('Address copied');
+    } catch {
+      toast.error('Could not copy address');
+    }
+  };
+
   return (
-    <section className="token-creator-section">
-      <div className="container">
-        <div className="section-header">
-          <div>
-            <h2 className="section-title">Deploy Token</h2>
-            <p className="section-subtitle">Deploy your token on the Sepolia network</p>
-          </div>
+    <section className="section token-creator-section" id="token-deployer">
+      <div className="container token-creator-grid">
+        <div className="token-creator-copy">
+          <span className="icon-tile accent"><Rocket size={20} /></span>
+          <h2 className="section-title">Deploy your own token</h2>
+          <p className="section-sub">
+            Launch a standard ERC-20 on Sepolia straight from your wallet. Name it, set the supply, and sign one transaction.
+          </p>
+          <ul className="token-creator-points">
+            <li><Check size={16} /> Fixed supply minted to your wallet</li>
+            <li><Check size={16} /> 18 decimals, standard ERC-20 interface</li>
+            <li><Check size={16} /> Testnet only, no real funds at risk</li>
+          </ul>
         </div>
 
-        <form className="token-creator-form" onSubmit={handleDeploy}>
-          <div className="form-group">
-            <label>Token Name</label>
-            <input
-              type="text"
-              placeholder="Example: MyToken"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="form-group">
-            <label>Token Symbol</label>
-            <input
-              type="text"
-              placeholder="Example: MTK"
-              value={symbol}
-              onChange={(e) => setSymbol(e.target.value)}
-            />
-          </div>
-          <div className="form-group">
-            <label>Total Supply</label>
-            <input
-              type="number"
-              placeholder="Example: 1000000"
-              value={count}
-              onChange={(e) => setCount(e.target.value)}
-            />
-          </div>
+        <div className="token-creator-panel">
+          <form className="card token-creator-form" onSubmit={handleDeploy}>
+            <div className="form-group">
+              <label htmlFor="tc-name">Token name</label>
+              <input
+                id="tc-name"
+                type="text"
+                placeholder="MyToken"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="tc-symbol">Symbol</label>
+                <input
+                  id="tc-symbol"
+                  type="text"
+                  placeholder="MTK"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="tc-supply">Total supply</label>
+                <input
+                  id="tc-supply"
+                  type="number"
+                  placeholder="1000000"
+                  value={count}
+                  onChange={(e) => setCount(e.target.value)}
+                />
+              </div>
+            </div>
 
-          <button type="submit" className="btn btn-primary" disabled={deploying}>
-            {deploying ? 'Deploying...' : 'Deploy Token'}
-          </button>
-        </form>
+            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={deploying}>
+              {deploying ? <><span className="spinner" /> Deploying…</> : <><Rocket size={16} /> Deploy token</>}
+            </button>
+          </form>
 
-        {deployedAddress && (
-          <div className="deployed-result">
-            Contract Address: <code>{deployedAddress}</code>
-          </div>
-        )}
+          {deployedAddress && (
+            <div className="deployed-result">
+              <div className="deployed-label"><Check size={14} /> Deployed</div>
+              <code>{deployedAddress}</code>
+              <div className="deployed-actions">
+                <button type="button" className="icon-btn" onClick={copyAddress} aria-label="Copy contract address"><Copy size={16} /></button>
+                <a className="icon-btn" href={`https://sepolia.etherscan.io/address/${deployedAddress}`} target="_blank" rel="noreferrer" aria-label="View on Etherscan"><ExternalLink size={16} /></a>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

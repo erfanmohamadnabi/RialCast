@@ -1,9 +1,2 @@
-.app-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.app-main {
-  flex: 1;
-}
+.app-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+.app-main { flex: 1; }

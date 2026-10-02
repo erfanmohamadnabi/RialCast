@@ -1,8 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Wallet, ChevronDown, User, LogOut, Menu, X, Target, Gamepad2, Trophy } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
+import { LogoMark } from '../ui';
 import './Header.css';
+
+const navLinks = [
+  { to: '/bet', label: 'Predict', icon: Target },
+  { to: '/games', label: 'Games', icon: Gamepad2 },
+  { to: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+];
 
 export default function Header() {
   const { account, user, connect, disconnect, shortAddress } = useWallet();
@@ -22,15 +30,18 @@ export default function Header() {
         setDropdownOpen(false);
       }
     }
+    function handleEscape(e) {
+      if (e.key === 'Escape') { setDropdownOpen(false); setMenuOpen(false); }
+    }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
 
-  const navLinks = [
-    { to: '/bet', label: 'Bet' },
-    { to: '/games', label: 'Games' },
-    { to: '/leaderboard', label: 'Leaderboard' },
-  ];
+  const isActive = (to) => location.pathname.startsWith(to);
 
   const handleAddressClick = () => {
     setDropdownOpen(false);
@@ -45,75 +56,57 @@ export default function Header() {
   return (
     <header className="header">
       <div className="header-inner container">
-        {/* Logo */}
-        <Link to="/" className="header-logo">
-          <div className="logo-icon">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <circle cx="14" cy="14" r="13" stroke="#6c63ff" strokeWidth="2"/>
-              <path d="M9 14 L14 8 L19 14 L14 20 Z" fill="#6c63ff"/>
-              <circle cx="14" cy="14" r="3" fill="#00e5a0"/>
-            </svg>
-          </div>
-          <span>Rial<span className="logo-accent">Cast</span></span>
+        <Link to="/" className="header-logo" aria-label="RialCast home">
+          <LogoMark size={28} />
+          <span>RialCast</span>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="header-nav desktop-nav">
+        <nav className="header-nav desktop-nav" aria-label="Primary">
           {navLinks.map(link => (
             <Link
               key={link.to}
               to={link.to}
-              className={`nav-link ${location.pathname.startsWith(link.to) ? 'active' : ''}`}
+              className={`nav-link ${isActive(link.to) ? 'active' : ''}`}
             >
               {link.label}
+              {isActive(link.to) && <motion.span layoutId="nav-underline" className="nav-underline" />}
             </Link>
           ))}
         </nav>
 
-        {/* Wallet */}
         <div className="header-wallet">
           {account ? (
             <div className="wallet-connected" ref={dropdownRef}>
               <button
                 className="wallet-address-btn"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
+                aria-haspopup="menu"
+                aria-expanded={dropdownOpen}
               >
                 {user?.avatar ? (
-                  <img src={user.avatar} alt="avatar" className="wallet-avatar" />
+                  <img src={user.avatar} alt="" className="wallet-avatar" />
                 ) : (
-                  <div className="wallet-avatar-placeholder">
-                    {shortAddress.slice(0, 2)}
-                  </div>
+                  <div className="wallet-avatar-placeholder">{shortAddress.slice(2, 4)}</div>
                 )}
-                <span className="wallet-addr-text">{shortAddress}</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+                <span className="wallet-addr-text mono">{shortAddress}</span>
+                <ChevronDown size={14} className={`wallet-chevron ${dropdownOpen ? 'open' : ''}`} />
               </button>
 
               <AnimatePresence>
                 {dropdownOpen && (
                   <motion.div
                     className="wallet-dropdown"
-                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
+                    role="menu"
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.14 }}
                   >
-                    <button className="dropdown-item" onClick={handleAddressClick}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                      </svg>
-                      My Profile
+                    <button className="dropdown-item" role="menuitem" onClick={handleAddressClick}>
+                      <User size={16} /> My profile
                     </button>
-                    <button className="dropdown-item danger" onClick={handleDisconnect}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                      </svg>
-                      Disconnect
+                    <button className="dropdown-item danger" role="menuitem" onClick={handleDisconnect}>
+                      <LogOut size={16} /> Disconnect
                     </button>
                   </motion.div>
                 )}
@@ -121,48 +114,47 @@ export default function Header() {
             </div>
           ) : (
             <button className="btn btn-primary connect-btn" onClick={connect}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="7" width="20" height="14" rx="2"/>
-                <path d="M16 11a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" fill="currentColor" stroke="none"/>
-                <path d="M2 11h3"/>
-              </svg>
-              Connect Wallet
+              <Wallet size={16} />
+              <span>Connect<span className="hide-xs"> wallet</span></span>
             </button>
           )}
 
-          {/* Hamburger */}
           <button
-            className="hamburger"
+            className="icon-btn hamburger"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
           >
-            <span className={menuOpen ? 'open' : ''}></span>
-            <span className={menuOpen ? 'open' : ''}></span>
-            <span className={menuOpen ? 'open' : ''}></span>
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
+          <motion.nav
             className="mobile-menu"
+            aria-label="Mobile"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {navLinks.map(link => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`mobile-nav-link ${location.pathname.startsWith(link.to) ? 'active' : ''}`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </motion.div>
+            <div className="container mobile-menu-inner">
+              {navLinks.map(link => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`mobile-nav-link ${isActive(link.to) ? 'active' : ''}`}
+                  >
+                    <Icon size={18} /> {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.nav>
         )}
       </AnimatePresence>
     </header>

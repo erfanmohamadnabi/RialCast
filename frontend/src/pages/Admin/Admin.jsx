@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Lock, Plus, LogOut, ListChecks, Swords } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import { getBetContract } from '../../utils/contracts';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
+import { PageHeader, LoadingState, EmptyState } from '../../components/ui';
 import './Admin.css';
 
 function AdminLogin({ onLogin }) {
@@ -18,7 +20,7 @@ function AdminLogin({ onLogin }) {
       localStorage.setItem('rc_token', res.data.access);
       localStorage.setItem('rc_refresh', res.data.refresh);
       onLogin(res.data.user);
-      toast.success('Welcome, Admin!');
+      toast.success('Signed in as admin');
     } catch {
       toast.error('Invalid credentials or not an admin');
     }
@@ -26,41 +28,46 @@ function AdminLogin({ onLogin }) {
   };
 
   return (
-    <div className="admin-page">
+    <div className="admin-page page">
       <div className="container">
         <motion.div
           className="admin-login-card card"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
         >
-          <div className="admin-login-icon">🔐</div>
-          <h2>Admin Login</h2>
-          <p className="admin-login-sub">Enter your Django superuser credentials</p>
+          <span className="icon-tile accent"><Lock size={20} /></span>
+          <h2>Admin sign in</h2>
+          <p className="admin-login-sub">Use your Django superuser credentials.</p>
           <form onSubmit={handleSubmit} className="admin-form">
             <div className="form-group">
-              <label>Username</label>
+              <label htmlFor="adm-user">Username</label>
               <input
+                id="adm-user"
                 type="text"
                 className="form-input"
-                placeholder="admin username"
+                placeholder="Admin username"
+                autoComplete="username"
                 value={creds.username}
                 onChange={e => setCreds(c => ({ ...c, username: e.target.value }))}
                 required
               />
             </div>
             <div className="form-group">
-              <label>Password</label>
+              <label htmlFor="adm-pass">Password</label>
               <input
+                id="adm-pass"
                 type="password"
                 className="form-input"
                 placeholder="••••••••"
+                autoComplete="current-password"
                 value={creds.password}
                 onChange={e => setCreds(c => ({ ...c, password: e.target.value }))}
                 required
               />
             </div>
-            <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
-              {loading ? 'Logging in…' : 'Login'}
+            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={loading}>
+              {loading ? <><span className="spinner" /> Signing in…</> : 'Sign in'}
             </button>
           </form>
         </motion.div>
@@ -176,74 +183,68 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="admin-page">
+    <div className="admin-page page">
       <div className="container">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="admin-top-bar">
-            <div>
-              <h1 className="section-title">Admin Panel</h1>
-              <p className="section-subtitle">Logged in as <strong>{adminUser.username}</strong></p>
-            </div>
-            <button className="btn btn-secondary" onClick={handleLogout}>Logout</button>
-          </div>
-        </motion.div>
+        <PageHeader title="Admin panel" subtitle={<>Signed in as <strong>{adminUser.username}</strong></>}>
+          <button className="btn btn-secondary" onClick={handleLogout}><LogOut size={15} /> Sign out</button>
+        </PageHeader>
 
         <div className="admin-layout">
           {/* Create Match */}
           <div className="card admin-form-card">
-            <h2 className="admin-section-title">Create New Match</h2>
+            <h2 className="admin-section-title"><Plus size={18} /> Create new match</h2>
             <form onSubmit={handleCreate} className="admin-form">
               <div className="form-row">
                 <div className="form-group">
-                  <label>Title *</label>
-                  <input name="title" value={form.title} onChange={handleChange} required className="form-input" placeholder="Match title" />
+                  <label htmlFor="m-title">Title *</label>
+                  <input id="m-title" name="title" value={form.title} onChange={handleChange} required className="form-input" placeholder="Match title" />
                 </div>
                 <div className="form-group">
-                  <label>Points Reward</label>
-                  <input name="points_reward" type="number" value={form.points_reward} onChange={handleChange} className="form-input" min="1" />
+                  <label htmlFor="m-points">Points reward</label>
+                  <input id="m-points" name="points_reward" type="number" value={form.points_reward} onChange={handleChange} className="form-input" min="1" />
                 </div>
               </div>
               <div className="form-group">
-                <label>Description</label>
-                <textarea name="description" value={form.description} onChange={handleChange} className="form-input form-textarea" placeholder="Match description…" rows={3} />
+                <label htmlFor="m-desc">Description</label>
+                <textarea id="m-desc" name="description" value={form.description} onChange={handleChange} className="form-input form-textarea" placeholder="Match description…" rows={3} />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Team 1 Name</label>
-                  <input name="team1_name" value={form.team1_name} onChange={handleChange} className="form-input" />
+                  <label htmlFor="m-t1">Team 1 name</label>
+                  <input id="m-t1" name="team1_name" value={form.team1_name} onChange={handleChange} className="form-input" />
                 </div>
                 <div className="form-group">
-                  <label>Team 2 Name</label>
-                  <input name="team2_name" value={form.team2_name} onChange={handleChange} className="form-input" />
+                  <label htmlFor="m-t2">Team 2 name</label>
+                  <input id="m-t2" name="team2_name" value={form.team2_name} onChange={handleChange} className="form-input" />
                 </div>
               </div>
               <div className="form-group">
-                <label>Match Image</label>
-                <input name="image" type="file" accept="image/*" onChange={handleChange} className="form-input form-file" />
+                <label htmlFor="m-img">Match image</label>
+                <input id="m-img" name="image" type="file" accept="image/*" onChange={handleChange} className="form-input form-file" />
               </div>
-              <button type="submit" className="btn btn-primary" disabled={creating} style={{ width: '100%', justifyContent: 'center' }}>
-                {creating ? 'Creating…' : '+ Create Match'}
+              <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={creating}>
+                {creating ? <><span className="spinner" /> Creating…</> : <><Plus size={16} /> Create match</>}
               </button>
             </form>
           </div>
 
           {/* Existing Matches */}
           <div className="admin-matches">
-            <h2 className="admin-section-title">Existing Matches</h2>
+            <h2 className="admin-section-title"><ListChecks size={18} /> Existing matches</h2>
             {loading ? (
-              <div className="loading-state">Loading…</div>
+              <LoadingState />
             ) : matches.length === 0 ? (
-              <div className="empty-state">No matches yet.</div>
+              <EmptyState icon={Swords} title="No matches yet">Create your first match using the form.</EmptyState>
             ) : matches.map(match => (
-              <motion.div key={match.id} className="card admin-match-card" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <motion.div key={match.id} className="card admin-match-card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 <div className="admin-match-header">
-                  <div>
+                  <div className="admin-match-title">
                     <h3>{match.title}</h3>
-                    <span className={`badge badge-${match.status === 'open' ? 'success' : match.status === 'resolved' ? 'accent' : 'warning'}`}>
+                    <span className={`badge cap badge-${match.status === 'open' ? 'success' : match.status === 'resolved' ? 'accent' : 'warning'}`}>
                       {match.status}
                     </span>
                   </div>
-                  <span className="match-points-badge">+{match.points_reward} pts</span>
+                  <span className="match-points-badge num">+{match.points_reward} pts</span>
                 </div>
 
                 <div className="admin-match-teams">
@@ -252,11 +253,11 @@ export default function AdminPage() {
                   <span>{match.team2_name}</span>
                 </div>
 
-                <div className="vote-stats">
-                  <span>Team 1: {match.vote_percentages?.team1 ?? 0}%</span>
-                  <span>Draw: {match.vote_percentages?.draw ?? 0}%</span>
-                  <span>Team 2: {match.vote_percentages?.team2 ?? 0}%</span>
-                  <span className="total-votes">({match.vote_percentages?.total ?? 0} votes)</span>
+                <div className="vote-stats num">
+                  <span>Team 1 <b>{match.vote_percentages?.team1 ?? 0}%</b></span>
+                  <span>Draw <b>{match.vote_percentages?.draw ?? 0}%</b></span>
+                  <span>Team 2 <b>{match.vote_percentages?.team2 ?? 0}%</b></span>
+                  <span className="total-votes">{match.vote_percentages?.total ?? 0} votes</span>
                 </div>
 
                 {match.result && (
@@ -267,16 +268,16 @@ export default function AdminPage() {
 
                 {match.status === 'open' && (
                   <div className="resolve-actions">
-                    <p className="resolve-label">Resolve as:</p>
+                    <p className="resolve-label">Resolve as</p>
                     <div className="resolve-btns">
                       <button className="btn btn-secondary resolve-btn" onClick={() => handleResolve(match.id, 'team1')}>
-                        {match.team1_name} Win
+                        {match.team1_name} win
                       </button>
                       <button className="btn btn-secondary resolve-btn" onClick={() => handleResolve(match.id, 'draw')}>
                         Draw
                       </button>
                       <button className="btn btn-secondary resolve-btn" onClick={() => handleResolve(match.id, 'team2')}>
-                        {match.team2_name} Win
+                        {match.team2_name} win
                       </button>
                     </div>
                   </div>

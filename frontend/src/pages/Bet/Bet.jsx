@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Trophy, Check, CalendarX2 } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import { getBetContract } from '../../utils/contracts';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
+import { PageHeader, LoadingState, EmptyState } from '../../components/ui';
 import './Bet.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -49,7 +51,7 @@ function MatchCard({ match, onVote }) {
         outcome,
         tx_hash: receipt.hash,
       });
-      toast.success('Your vote has been recorded! 🎉');
+      toast.success('Your vote has been recorded');
       onVote(match.id, outcome, res.data.vote_percentages);
     } catch (err) {
       if (err.code !== 4001) toast.error(err.response?.data?.error || 'Vote failed');
@@ -62,8 +64,9 @@ function MatchCard({ match, onVote }) {
   return (
     <motion.div
       className={`match-card card ${resolved ? 'resolved' : ''}`}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
       layout
     >
       {match.image && (
@@ -77,7 +80,7 @@ function MatchCard({ match, onVote }) {
         <div className="match-header">
           <h3 className="match-title">{match.title}</h3>
           <div className="match-badges">
-            <span className={`badge badge-${match.status === 'open' ? 'success' : match.status === 'resolved' ? 'accent' : 'warning'}`}>
+            <span className={`badge cap badge-${match.status === 'open' ? 'success' : match.status === 'resolved' ? 'accent' : 'warning'}`}>
               {match.status}
             </span>
             <span className="match-points">+{match.points_reward} pts</span>
@@ -87,9 +90,10 @@ function MatchCard({ match, onVote }) {
 
         {resolved && match.result && (
           <div className="match-result-banner">
-            🏆 Result: {match.result === 'team1' ? match.team1_name : match.result === 'team2' ? match.team2_name : 'Draw'}
+            <Trophy size={16} />
+            <span>Result: {match.result === 'team1' ? match.team1_name : match.result === 'team2' ? match.team2_name : 'Draw'}</span>
             {match.user_vote && match.user_vote === match.result && (
-              <span className="winner-badge"> — You won! +{match.points_reward} pts 🎉</span>
+              <span className="winner-badge">You won +{match.points_reward} pts</span>
             )}
           </div>
         )}
@@ -123,7 +127,7 @@ function MatchCard({ match, onVote }) {
             onClick={() => handleVote('team2')}
           />
         </div>
-        <p className="vote-total">{pct.total} votes total</p>
+        <p className="vote-total num">{pct.total} votes total</p>
       </div>
     </motion.div>
   );
@@ -135,10 +139,19 @@ function VoteButton({ label, pct, outcome, selected, correct, disabled, onClick 
       className={`vote-btn ${selected ? 'selected' : ''} ${correct ? 'correct' : ''} ${outcome}`}
       onClick={onClick}
       disabled={disabled}
+      aria-pressed={selected}
     >
-      <div className="vote-btn-bar" style={{ width: `${pct}%` }} />
-      <span className="vote-btn-label">{label}</span>
-      <span className="vote-btn-pct">{pct}%</span>
+      <motion.div
+        className="vote-btn-bar"
+        initial={{ width: 0 }}
+        animate={{ width: `${pct}%` }}
+        transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
+      />
+      <span className="vote-btn-label">
+        {selected && <Check size={14} />}
+        <span>{label}</span>
+      </span>
+      <span className="vote-btn-pct num">{pct}%</span>
     </button>
   );
 }
@@ -163,17 +176,19 @@ export default function BetPage() {
   };
 
   return (
-    <div className="bet-page">
+    <div className="bet-page page">
       <div className="container">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="section-title">Football Betting</h1>
-          <p className="section-subtitle">Predict match outcomes on-chain and earn points</p>
-        </motion.div>
+        <PageHeader
+          title="Football predictions"
+          subtitle="Predict match outcomes on-chain and earn points for every correct call."
+        />
 
         {loading ? (
-          <div className="loading-state">Loading matches…</div>
+          <LoadingState label="Loading matches…" />
         ) : matches.length === 0 ? (
-          <div className="empty-state">No matches available yet. Check back soon!</div>
+          <EmptyState icon={CalendarX2} title="No matches yet">
+            New markets will appear here as soon as they’re created. Check back soon.
+          </EmptyState>
         ) : (
           <div className="matches-grid">
             {matches.map(match => (

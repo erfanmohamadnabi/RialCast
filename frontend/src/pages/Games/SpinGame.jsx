@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Disc3, Trophy, Frown, Wallet, Coins } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import { getSpinContract, SPIN_FEE, SEGMENT_LABELS, SEGMENT_COLORS, SEGMENT_POINTS } from '../../utils/contracts';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
+import { PageHeader } from '../../components/ui';
 import './SpinGame.css';
 
 const NUM_SEGMENTS = 8;
@@ -29,11 +31,11 @@ function drawWheel(canvas, highlightedSegment = -1, currentAngle = 0) {
     ctx.arc(cx, cy, radius, startAngle, endAngle);
     ctx.closePath();
     ctx.fillStyle = i === highlightedSegment
-      ? '#fff'
+      ? '#39ff14'
       : SEGMENT_COLORS[i];
     ctx.fill();
-    ctx.strokeStyle = 'rgba(10,10,15,0.6)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#2b322b';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     // Labels
@@ -41,8 +43,9 @@ function drawWheel(canvas, highlightedSegment = -1, currentAngle = 0) {
     ctx.translate(cx, cy);
     ctx.rotate(startAngle + anglePerSeg / 2);
     ctx.textAlign = 'right';
-    ctx.fillStyle = i === highlightedSegment ? '#000' : '#fff';
-    ctx.font = `bold ${size * 0.042}px Space Grotesk, sans-serif`;
+    const bright = i === highlightedSegment || SEGMENT_COLORS[i] === '#39ff14';
+    ctx.fillStyle = bright ? '#031200' : '#f3f6f3';
+    ctx.font = `600 ${size * 0.044}px Geist, system-ui, sans-serif`;
     ctx.fillText(SEGMENT_LABELS[i], radius - 12, 5);
     ctx.restore();
   }
@@ -50,10 +53,10 @@ function drawWheel(canvas, highlightedSegment = -1, currentAngle = 0) {
   // Center circle
   ctx.beginPath();
   ctx.arc(cx, cy, radius * 0.12, 0, 2 * Math.PI);
-  ctx.fillStyle = '#0a0a0f';
+  ctx.fillStyle = '#000000';
   ctx.fill();
-  ctx.strokeStyle = '#6c63ff';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#39ff14';
+  ctx.lineWidth = 2;
   ctx.stroke();
 }
 
@@ -109,7 +112,7 @@ export default function SpinGame() {
 
   const handleSpin = async () => {
     if (!account || !signer) {
-      toast.error('Connect your wallet to play!');
+      toast.error('Connect your wallet to play');
       return;
     }
     setSpinning(true);
@@ -142,7 +145,7 @@ export default function SpinGame() {
             result_segment: segment,
           });
           setLastResult(res.data);
-          toast.success(`🎉 You earned ${res.data.points_earned} points!`);
+          toast.success(`You earned ${res.data.points_earned} points`);
           loadUserProfile();
         } catch (err) {
           toast.error('Failed to record result');
@@ -157,90 +160,101 @@ export default function SpinGame() {
     }
   };
 
+  const won = result !== null && SEGMENT_POINTS[result - 1] > 0;
+
   return (
-    <div className="spin-page">
+    <div className="spin-page page">
       <div className="container">
-        <div className="spin-header">
-          <h1 className="section-title">Spin Wheel</h1>
-          <p className="section-subtitle">
-            Spin the wheel for a chance to win up to <strong>100 points</strong>. Costs 0.001 Sepolia ETH.
-          </p>
-        </div>
+        <PageHeader
+          title="Spin Wheel"
+          subtitle={<>Spin for a chance to win up to <strong>100 points</strong>. Each spin costs 0.001 Sepolia ETH.</>}
+        />
 
         <div className="spin-layout">
-          <div className="wheel-container">
-            {/* Pointer */}
-            <div className="wheel-pointer">▼</div>
-            <canvas
-              ref={canvasRef}
-              width={400}
-              height={400}
-              className="wheel-canvas"
-            />
+          <div className="wheel-panel card">
+            <div className="wheel-container">
+              <div className="wheel-pointer" aria-hidden="true" />
+              <canvas
+                ref={canvasRef}
+                width={400}
+                height={400}
+                className="wheel-canvas"
+                role="img"
+                aria-label="Prize wheel"
+              />
+            </div>
           </div>
 
           <div className="spin-sidebar">
+            <div className="card spin-action-card">
+              <div className="spin-action-top">
+                <span className="icon-tile accent"><Disc3 size={20} /></span>
+                <div>
+                  <div className="spin-action-title">Spin the wheel</div>
+                  <div className="spin-action-sub num">0.001 ETH · Sepolia</div>
+                </div>
+              </div>
+
+              <button
+                className={`btn btn-primary btn-lg btn-block spin-btn ${spinning ? 'spinning' : ''}`}
+                onClick={handleSpin}
+                disabled={spinning || !account}
+              >
+                {spinning ? (
+                  <><span className="spinner" /> Spinning…</>
+                ) : (
+                  <><Disc3 size={18} /> Spin for 0.001 ETH</>
+                )}
+              </button>
+
+              {!account && (
+                <p className="spin-notice"><Wallet size={14} /> Connect your wallet to play</p>
+              )}
+
+              <AnimatePresence>
+                {lastResult && (
+                  <motion.div
+                    className={`spin-result-card ${won ? 'won' : ''}`}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <span className="icon-tile accent">{won ? <Trophy size={20} /> : <Frown size={20} />}</span>
+                    <div>
+                      <div className="result-points num">{won ? `+${lastResult.points_earned}` : '0'} pts</div>
+                      <div className="result-total num">Total: {lastResult.total_points} pts</div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {user && (
+                <div className="user-points-display">
+                  <span className="points-label"><Coins size={15} /> Your points</span>
+                  <span className="points-value num">{user.points}</span>
+                </div>
+              )}
+            </div>
+
             <div className="card spin-info-card">
-              <h3>How to Play</h3>
-              <ul className="spin-steps">
+              <h3>How to play</h3>
+              <ol className="spin-steps">
                 <li>Connect your MetaMask wallet</li>
-                <li>Make sure you're on Sepolia Testnet</li>
+                <li>Make sure you’re on Sepolia testnet</li>
                 <li>Pay 0.001 ETH to spin</li>
-                <li>Land on a segment to earn points</li>
-              </ul>
+                <li>Land on a segment to earn its points</li>
+              </ol>
 
               <div className="spin-segments-legend">
                 {SEGMENT_LABELS.map((label, i) => (
                   <div key={i} className="legend-item">
-                    <div className="legend-color" style={{ background: SEGMENT_COLORS[i] }} />
-                    <span>{label}</span>
+                    <span className="legend-color" style={{ background: SEGMENT_COLORS[i] }} />
+                    <span className="num">{label}</span>
                   </div>
                 ))}
               </div>
             </div>
-
-            <button
-              className={`btn btn-primary spin-btn ${spinning ? 'spinning' : ''}`}
-              onClick={handleSpin}
-              disabled={spinning || !account}
-            >
-              {spinning ? (
-                <>
-                  <span className="spinner" />
-                  Spinning...
-                </>
-              ) : (
-                <>🎰 Spin (0.001 ETH)</>
-              )}
-            </button>
-
-            {!account && (
-              <p className="spin-notice">Connect your wallet to play</p>
-            )}
-
-            <AnimatePresence>
-              {lastResult && (
-                <motion.div
-                  className="spin-result-card"
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                >
-                  <div className="result-emoji">
-                    {SEGMENT_POINTS[result - 1] > 0 ? '🎉' : '😢'}
-                  </div>
-                  <div className="result-points">{lastResult.points_earned} pts</div>
-                  <div className="result-total">Total: {lastResult.total_points} pts</div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {user && (
-              <div className="user-points-display">
-                <span className="points-label">Your Points</span>
-                <span className="points-value">{user.points}</span>
-              </div>
-            )}
           </div>
         </div>
       </div>

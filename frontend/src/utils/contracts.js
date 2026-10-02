@@ -22,6 +22,7 @@ export function getBetContract(signer) {
   );
 }
 
-export const SEGMENT_LABELS = ['🎰 10pts', '⭐ 20pts', '💎 5pts', '🔥 50pts', '✨ 15pts', '🚀 30pts', '👑 100pts', '😢 0pts'];
-export const SEGMENT_COLORS = ['#6c63ff', '#00e5a0', '#ff4d6d', '#ffd166', '#a78bfa', '#38bdf8', '#f97316', '#374151'];
+export const SEGMENT_LABELS = ['10 pts', '20 pts', '5 pts', '50 pts', '15 pts', '30 pts', '100 pts', '0 pts'];
+// Graphite tones with the accent reserved for the highest-value segments.
+export const SEGMENT_COLORS = ['#101310', '#1a1e1a', '#101310', '#1f3a1a', '#101310', '#1a1e1a', '#39ff14', '#1a1e1a'];
 export const SEGMENT_POINTS = [10, 20, 5, 50, 15, 30, 100, 0];
