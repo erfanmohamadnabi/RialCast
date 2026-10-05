@@ -7,8 +7,8 @@ import './Games.css';
 
 const games = [
   { id: 'spin', name: 'Spin Wheel', desc: 'Spin the wheel and win up to 100 points per roll.', icon: Disc3, available: true, cost: '0.001 ETH per spin' },
+  { id: 'dice', name: 'Dice Roll', desc: 'Roll the dice and win up to 50 points per roll.', icon: Dices, available: true, cost: '0.001 ETH per roll' },
   { id: 'cards', name: 'Card Battle', desc: 'Compete in card duels against other players.', icon: Spade, available: false, cost: 'Soon' },
-  { id: 'dice', name: 'Dice Roll', desc: 'Roll the dice and earn points.', icon: Dices, available: false, cost: 'Soon' },
 ];
 
 export default function GamesPage() {

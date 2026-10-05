@@ -25,3 +25,19 @@ class SpinResult(models.Model):
 
     def __str__(self):
         return f"{self.user} spun {self.result_segment} - {self.points_earned}pts"
+
+
+class DiceResult(models.Model):
+    """A dice roll. Uses the same on-chain SpinGame transaction as the spin game."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='dice_results')
+    tx_hash = models.CharField(max_length=66, unique=True)
+    spin_result = models.IntegerField()  # raw on-chain result 1-8 from the Spun event
+    dice_value = models.IntegerField()  # 1-6
+    points_earned = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user} rolled {self.dice_value} - {self.points_earned}pts"

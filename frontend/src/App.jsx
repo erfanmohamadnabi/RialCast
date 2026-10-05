@@ -10,6 +10,7 @@ import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import GamesPage from './pages/Games/Games';
 import SpinGame from './pages/Games/SpinGame';
+import DiceGame from './pages/Games/DiceGame';
 import BetPage from './pages/Bet/Bet';
 import ProfilePage from './pages/Profile/Profile';
 import PublicProfilePage from './pages/Profile/PublicProfile';
@@ -27,6 +28,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/games" element={<GamesPage />} />
               <Route path="/games/spin" element={<SpinGame />} />
+              <Route path="/games/dice" element={<DiceGame />} />
               <Route path="/bet" element={<BetPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/profile/:id" element={<PublicProfilePage />} />
