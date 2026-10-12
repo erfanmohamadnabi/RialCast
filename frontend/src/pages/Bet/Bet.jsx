@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Check, CalendarX2 } from 'lucide-react';
+import { Trophy, Check, CalendarX2, Sparkles } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import { getBetContract } from '../../utils/contracts';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { PageHeader, LoadingState, EmptyState } from '../../components/ui';
+import AiAnalysisModal from '../../components/AiAnalysisModal/AiAnalysisModal';
 import './Bet.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -13,6 +14,10 @@ const API_URL = process.env.REACT_APP_API_URL || '/api';
 function MatchCard({ match, onVote }) {
   const { account, signer } = useWallet();
   const [voting, setVoting] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiText, setAiText] = useState('');
+  const [aiError, setAiError] = useState('');
   const pct = match.vote_percentages;
   const isYesNo = match.category === 'other';
   const resultLabel = match.result === 'team1' ? match.team1_name : match.result === 'team2' ? match.team2_name : 'Draw';
@@ -59,6 +64,29 @@ function MatchCard({ match, onVote }) {
       if (err.code !== 4001) toast.error(err.response?.data?.error || 'Vote failed');
     }
     setVoting(false);
+  };
+
+  const fetchAnalysis = async () => {
+    setAiLoading(true);
+    setAiError('');
+    try {
+      const res = await api.post(`/bets/${match.id}/analyze/`, {}, { timeout: 40000 });
+      setAiText(res.data.analysis);
+    } catch (err) {
+      setAiError(
+        err.response?.data?.error
+        || (err.response?.status === 429 ? 'Too many requests. Please wait a minute and try again.' : '')
+        || (err.response?.status === 401 ? 'Please connect your wallet and sign in to use AI analysis.' : '')
+        || 'Could not get the analysis. Please try again.'
+      );
+    }
+    setAiLoading(false);
+  };
+
+  const handleAnalyze = () => {
+    if (!account) { toast.error('Connect your wallet to use AI analysis'); return; }
+    setAiOpen(true);
+    if (!aiText) fetchAnalysis();
   };
 
   const resolved = match.status === 'resolved';
@@ -133,6 +161,18 @@ function MatchCard({ match, onVote }) {
           />
         </div>
         <p className="vote-total num">{pct.total} votes total</p>
+        <button type="button" className="btn btn-secondary btn-block ai-analyze-btn" onClick={handleAnalyze}>
+          <Sparkles size={16} /> Analyze with AI
+        </button>
+        <AiAnalysisModal
+          open={aiOpen}
+          title={match.title}
+          loading={aiLoading}
+          error={aiError}
+          text={aiText}
+          onClose={() => setAiOpen(false)}
+          onRetry={fetchAnalysis}
+        />
       </div>
     </motion.div>
   );

@@ -1,8 +1,13 @@
+import hashlib
+
+from django.core.cache import cache
 from rest_framework import status, generics
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 
+from .ai import AIAnalysisError, analyze, build_prompt
 from .models import BetMatch, BetVote
 from .serializers import (
     BetMatchSerializer, BetMatchCreateSerializer,
@@ -129,3 +134,34 @@ class RecentBetsView(APIView):
                 'created_at': vote.created_at,
             })
         return Response(data)
+
+
+class AnalyzeThrottle(UserRateThrottle):
+    scope = 'ai_analyze'
+    rate = '10/min'
+
+
+class AnalyzeMatchView(APIView):
+    """AI analysis of a prediction, based on its description."""
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [AnalyzeThrottle]
+
+    def post(self, request, pk):
+        try:
+            match = BetMatch.objects.get(pk=pk)
+        except BetMatch.DoesNotExist:
+            return Response({'error': 'Match not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        prompt = build_prompt(match)
+        cache_key = f"bet-ai-{match.pk}-{hashlib.sha1(prompt.encode()).hexdigest()}"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response({'analysis': cached, 'cached': True})
+
+        try:
+            analysis = analyze(prompt)
+        except AIAnalysisError as e:
+            return Response({'error': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+        cache.set(cache_key, analysis, 60 * 60)
+        return Response({'analysis': analysis, 'cached': False})

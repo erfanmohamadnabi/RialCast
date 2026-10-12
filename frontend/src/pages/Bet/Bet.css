@@ -47,3 +47,5 @@
   .match-header { flex-direction: column; gap: 10px; }
 }
 .vote-buttons.two { grid-template-columns: repeat(2, 1fr); }
+.ai-analyze-btn svg { color: var(--neon); }
+.ai-analyze-btn:hover:not(:disabled) { border-color: var(--neon-line); }
