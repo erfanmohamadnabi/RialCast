@@ -9,7 +9,7 @@ class BetMatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = BetMatch
         fields = [
-            'id', 'title', 'description', 'image', 'points_reward',
+            'id', 'title', 'description', 'image', 'category', 'points_reward',
             'on_chain_match_id', 'status', 'result',
             'team1_name', 'team2_name',
             'vote_percentages', 'user_vote', 'created_at'
@@ -29,7 +29,14 @@ class BetMatchSerializer(serializers.ModelSerializer):
 class BetMatchCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = BetMatch
-        fields = ['title', 'description', 'image', 'points_reward', 'team1_name', 'team2_name', 'on_chain_match_id']
+        fields = ['title', 'description', 'image', 'category', 'points_reward', 'team1_name', 'team2_name', 'on_chain_match_id']
+
+    def validate(self, attrs):
+        # "Other" category: always a Yes / No question.
+        if attrs.get('category') == BetMatch.CATEGORY_OTHER:
+            attrs['team1_name'] = 'Yes'
+            attrs['team2_name'] = 'No'
+        return attrs
 
 
 class BetVoteSerializer(serializers.Serializer):

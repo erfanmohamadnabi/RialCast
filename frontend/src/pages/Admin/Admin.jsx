@@ -83,7 +83,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({
-    title: '', description: '', points_reward: 100,
+    title: '', description: '', category: 'football', points_reward: 100,
     team1_name: 'Team 1', team2_name: 'Team 2',
     on_chain_match_id: 1, image: null,
   });
@@ -154,12 +154,14 @@ export default function AdminPage() {
       // Step 2: Save to backend with the real on_chain_match_id
       toast.loading('Step 2/2: Saving to database…', { id: 'saving' });
       const fd = new FormData();
-      Object.entries({ ...form, on_chain_match_id: onChainMatchId })
+      const payload = { ...form, on_chain_match_id: onChainMatchId };
+      if (form.category === 'other') { payload.team1_name = 'Yes'; payload.team2_name = 'No'; }
+      Object.entries(payload)
         .forEach(([k, v]) => { if (v !== null && v !== '') fd.append(k, v); });
       await api.post('/bets/create/', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       toast.dismiss('saving');
       toast.success(`Match "${form.title}" created! On-chain ID: ${onChainMatchId}`);
-      setForm({ title: '', description: '', points_reward: 100, team1_name: 'Team 1', team2_name: 'Team 2', on_chain_match_id: '', image: null });
+      setForm({ title: '', description: '', category: 'football', points_reward: 100, team1_name: 'Team 1', team2_name: 'Team 2', on_chain_match_id: '', image: null });
       fetchMatches();
     } catch (err) {
       toast.dismiss('saving');
@@ -208,16 +210,40 @@ export default function AdminPage() {
                 <label htmlFor="m-desc">Description</label>
                 <textarea id="m-desc" name="description" value={form.description} onChange={handleChange} className="form-input form-textarea" placeholder="Match description…" rows={3} />
               </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="m-t1">Team 1 name</label>
-                  <input id="m-t1" name="team1_name" value={form.team1_name} onChange={handleChange} className="form-input" />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="m-t2">Team 2 name</label>
-                  <input id="m-t2" name="team2_name" value={form.team2_name} onChange={handleChange} className="form-input" />
+              <div className="form-group">
+                <label id="m-cat-label">Category</label>
+                <div className="category-toggle" role="radiogroup" aria-labelledby="m-cat-label">
+                  {[
+                    { id: 'football', label: 'Football' },
+                    { id: 'other', label: 'Other (Yes / No)' },
+                  ].map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={form.category === c.id}
+                      className={`category-option ${form.category === c.id ? 'active' : ''}`}
+                      onClick={() => setForm(f => ({ ...f, category: c.id }))}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
                 </div>
               </div>
+              {form.category === 'football' ? (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="m-t1">Team 1 name</label>
+                    <input id="m-t1" name="team1_name" value={form.team1_name} onChange={handleChange} className="form-input" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="m-t2">Team 2 name</label>
+                    <input id="m-t2" name="team2_name" value={form.team2_name} onChange={handleChange} className="form-input" />
+                  </div>
+                </div>
+              ) : (
+                <p className="category-hint">Voters will get two options: <strong>Yes</strong> or <strong>No</strong>.</p>
+              )}
               <div className="form-group">
                 <label htmlFor="m-img">Match image</label>
                 <input id="m-img" name="image" type="file" accept="image/*" onChange={handleChange} className="form-input form-file" />
@@ -248,15 +274,21 @@ export default function AdminPage() {
                 </div>
 
                 <div className="admin-match-teams">
-                  <span>{match.team1_name}</span>
-                  <span className="vs-text">vs</span>
-                  <span>{match.team2_name}</span>
+                  {match.category === 'other' ? (
+                    <span>Yes / No question</span>
+                  ) : (
+                    <>
+                      <span>{match.team1_name}</span>
+                      <span className="vs-text">vs</span>
+                      <span>{match.team2_name}</span>
+                    </>
+                  )}
                 </div>
 
                 <div className="vote-stats num">
-                  <span>Team 1 <b>{match.vote_percentages?.team1 ?? 0}%</b></span>
-                  <span>Draw <b>{match.vote_percentages?.draw ?? 0}%</b></span>
-                  <span>Team 2 <b>{match.vote_percentages?.team2 ?? 0}%</b></span>
+                  <span>{match.category === 'other' ? 'Yes' : 'Team 1'} <b>{match.vote_percentages?.team1 ?? 0}%</b></span>
+                  {match.category !== 'other' && <span>Draw <b>{match.vote_percentages?.draw ?? 0}%</b></span>}
+                  <span>{match.category === 'other' ? 'No' : 'Team 2'} <b>{match.vote_percentages?.team2 ?? 0}%</b></span>
                   <span className="total-votes">{match.vote_percentages?.total ?? 0} votes</span>
                 </div>
 
@@ -271,13 +303,15 @@ export default function AdminPage() {
                     <p className="resolve-label">Resolve as</p>
                     <div className="resolve-btns">
                       <button className="btn btn-secondary resolve-btn" onClick={() => handleResolve(match.id, 'team1')}>
-                        {match.team1_name} win
+                        {match.category === 'other' ? 'Yes' : `${match.team1_name} win`}
                       </button>
-                      <button className="btn btn-secondary resolve-btn" onClick={() => handleResolve(match.id, 'draw')}>
-                        Draw
-                      </button>
+                      {match.category !== 'other' && (
+                        <button className="btn btn-secondary resolve-btn" onClick={() => handleResolve(match.id, 'draw')}>
+                          Draw
+                        </button>
+                      )}
                       <button className="btn btn-secondary resolve-btn" onClick={() => handleResolve(match.id, 'team2')}>
-                        {match.team2_name} win
+                        {match.category === 'other' ? 'No' : `${match.team2_name} win`}
                       </button>
                     </div>
                   </div>

@@ -60,6 +60,9 @@ class CastVoteView(APIView):
         serializer = BetVoteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        if serializer.validated_data['outcome'] not in match.allowed_outcomes:
+            return Response({'error': 'Invalid option for this category'}, status=status.HTTP_400_BAD_REQUEST)
+
         if BetVote.objects.filter(tx_hash=serializer.validated_data['tx_hash']).exists():
             return Response({'error': 'Transaction already used'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -91,6 +94,9 @@ class ResolveMatchView(APIView):
         serializer = ResolveMatchSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = serializer.validated_data['result']
+
+        if result not in match.allowed_outcomes:
+            return Response({'error': 'Invalid result for this category'}, status=status.HTTP_400_BAD_REQUEST)
 
         match.result = result
         match.status = 'resolved'

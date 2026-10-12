@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, ArrowUpRight, Wallet, Target, Trophy, ShieldCheck, KeyRound, Coins,
-  Disc3, Spade, Network, Gamepad2, Plus, Minus, ShieldAlert, Link2, Users, BarChart3, Zap,
+  Disc3, Dices, Spade, Network, Gamepad2, Plus, Minus, ShieldAlert, Link2, Users, BarChart3, Zap,
 } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import api from '../../utils/api';
@@ -302,6 +302,15 @@ export default function Home() {
               <div className="game-preview-info">
                 <h3>Spin Wheel</h3>
                 <p>Win up to 100 points per spin.</p>
+              </div>
+              <span className="badge badge-success">Available</span>
+              <ArrowUpRight size={18} className="game-preview-arrow" />
+            </Link>
+            <Link to="/games/dice" className="game-preview-card card card-interactive">
+              <span className="icon-tile accent"><Dices size={22} /></span>
+              <div className="game-preview-info">
+                <h3>Dice Roll</h3>
+                <p>Roll the die for up to 100 points.</p>
               </div>
               <span className="badge badge-success">Available</span>
               <ArrowUpRight size={18} className="game-preview-arrow" />

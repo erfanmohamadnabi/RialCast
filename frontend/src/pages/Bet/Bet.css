@@ -46,3 +46,4 @@
   .vote-btn-pct { font-size: 1.0625rem; }
   .match-header { flex-direction: column; gap: 10px; }
 }
+.vote-buttons.two { grid-template-columns: repeat(2, 1fr); }

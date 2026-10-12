@@ -14,6 +14,8 @@ function MatchCard({ match, onVote }) {
   const { account, signer } = useWallet();
   const [voting, setVoting] = useState(false);
   const pct = match.vote_percentages;
+  const isYesNo = match.category === 'other';
+  const resultLabel = match.result === 'team1' ? match.team1_name : match.result === 'team2' ? match.team2_name : 'Draw';
 
   const handleVote = async (outcome) => {
     if (!account || !signer) { toast.error('Connect wallet to vote'); return; }
@@ -80,6 +82,7 @@ function MatchCard({ match, onVote }) {
         <div className="match-header">
           <h3 className="match-title">{match.title}</h3>
           <div className="match-badges">
+            <span className="badge">{isYesNo ? 'Yes / No' : 'Football'}</span>
             <span className={`badge cap badge-${match.status === 'open' ? 'success' : match.status === 'resolved' ? 'accent' : 'warning'}`}>
               {match.status}
             </span>
@@ -91,14 +94,14 @@ function MatchCard({ match, onVote }) {
         {resolved && match.result && (
           <div className="match-result-banner">
             <Trophy size={16} />
-            <span>Result: {match.result === 'team1' ? match.team1_name : match.result === 'team2' ? match.team2_name : 'Draw'}</span>
+            <span>Result: {resultLabel}</span>
             {match.user_vote && match.user_vote === match.result && (
               <span className="winner-badge">You won +{match.points_reward} pts</span>
             )}
           </div>
         )}
 
-        <div className="vote-buttons">
+        <div className={`vote-buttons ${isYesNo ? 'two' : ''}`}>
           <VoteButton
             label={match.team1_name}
             pct={pct.team1}
@@ -108,15 +111,17 @@ function MatchCard({ match, onVote }) {
             disabled={!!match.user_vote || voting || match.status !== 'open'}
             onClick={() => handleVote('team1')}
           />
-          <VoteButton
-            label="Draw"
-            pct={pct.draw}
-            outcome="draw"
-            selected={match.user_vote === 'draw'}
-            correct={resolved && match.result === 'draw'}
-            disabled={!!match.user_vote || voting || match.status !== 'open'}
-            onClick={() => handleVote('draw')}
-          />
+          {!isYesNo && (
+            <VoteButton
+              label="Draw"
+              pct={pct.draw}
+              outcome="draw"
+              selected={match.user_vote === 'draw'}
+              correct={resolved && match.result === 'draw'}
+              disabled={!!match.user_vote || voting || match.status !== 'open'}
+              onClick={() => handleVote('draw')}
+            />
+          )}
           <VoteButton
             label={match.team2_name}
             pct={pct.team2}
@@ -179,7 +184,7 @@ export default function BetPage() {
     <div className="bet-page page">
       <div className="container">
         <PageHeader
-          title="Football predictions"
+          title="Predictions"
           subtitle="Predict match outcomes on-chain and earn points for every correct call."
         />
 

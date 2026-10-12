@@ -34,3 +34,13 @@
   .admin-form-card { position: static; }
 }
 @media (max-width: 480px) { .admin-login-card { padding: 28px 22px; } }
+.category-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.category-option {
+  padding: 12px 14px; border-radius: var(--r-md, 12px); cursor: pointer;
+  border: 1px solid var(--line-strong); background: var(--bg-2); color: var(--text-2);
+  font: inherit; font-size: 0.875rem; font-weight: 500; transition: border-color .15s, color .15s, background .15s;
+}
+.category-option:hover { border-color: var(--neon-line); }
+.category-option.active { border-color: var(--neon); color: var(--neon); background: var(--neon-soft); }
+.category-hint { font-size: 0.875rem; color: var(--text-2); }
+.category-hint strong { color: var(--text); }

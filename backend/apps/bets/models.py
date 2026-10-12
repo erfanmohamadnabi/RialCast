@@ -15,7 +15,15 @@ class BetMatch(models.Model):
         ('resolved', 'Resolved'),
     ]
 
+    CATEGORY_FOOTBALL = 'football'
+    CATEGORY_OTHER = 'other'
+    CATEGORY_CHOICES = [
+        (CATEGORY_FOOTBALL, 'Football (Team 1 / Draw / Team 2)'),
+        (CATEGORY_OTHER, 'Other (Yes / No)'),
+    ]
+
     title = models.CharField(max_length=200)
+    category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default=CATEGORY_FOOTBALL)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='bet_matches/', null=True, blank=True)
     points_reward = models.IntegerField(default=100)
@@ -32,6 +40,13 @@ class BetMatch(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def allowed_outcomes(self):
+        # 'other' category is a simple Yes (team1) / No (team2) question - no draw.
+        if self.category == self.CATEGORY_OTHER:
+            return ['team1', 'team2']
+        return ['team1', 'team2', 'draw']
 
     def get_vote_percentages(self):
         total = self.votes.count()

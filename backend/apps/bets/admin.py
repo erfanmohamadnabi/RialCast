@@ -3,8 +3,8 @@ from .models import BetMatch, BetVote
 
 @admin.register(BetMatch)
 class BetMatchAdmin(admin.ModelAdmin):
-    list_display = ['title', 'status', 'result', 'points_reward', 'created_at']
-    list_filter = ['status']
+    list_display = ['title', 'category', 'status', 'result', 'points_reward', 'created_at']
+    list_filter = ['status', 'category']
     actions = ['close_match']
 
 @admin.register(BetVote)

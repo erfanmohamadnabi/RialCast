@@ -27,16 +27,11 @@ export const SEGMENT_LABELS = ['10 pts', '20 pts', '5 pts', '50 pts', '15 pts', 
 export const SEGMENT_COLORS = ['#101310', '#1a1e1a', '#101310', '#1f3a1a', '#101310', '#1a1e1a', '#39ff14', '#1a1e1a'];
 export const SEGMENT_POINTS = [10, 20, 5, 50, 15, 30, 100, 0];
 
-// ---------------------------------------------------------------------------
-// Dice game (reuses the SpinGame contract: spin() + the `Spun` event)
-// ---------------------------------------------------------------------------
+// ---- Dice game (uses the same SpinGame contract; no extra deployment) ----
+export const DICE_POINTS = [5, 10, 20, 30, 50, 100]; // index = face - 1
 
-// Points per face, index 0 = face 1. Must match DICE_POINTS in backend/apps/games/dice.py
-export const DICE_POINTS = [5, 10, 15, 20, 30, 50];
-
-// Maps the on-chain spin result (1-8) to a fair die face (1-6).
-// Must stay identical to derive_dice_value() in backend/apps/games/dice.py
-export function deriveDiceValue(txHash, spinResult) {
-  const seed = ethers.toUtf8Bytes(`${txHash.toLowerCase()}:${Number(spinResult)}`);
-  return Number(BigInt(ethers.sha256(seed)) % 6n) + 1;
+// Must match roll_dice() in backend/apps/games/views.py
+export function getDiceFace(txHash, contractResult) {
+  const digest = ethers.sha256(ethers.toUtf8Bytes(`${txHash.toLowerCase()}:${contractResult}`));
+  return Number(BigInt(digest) % 6n) + 1;
 }
